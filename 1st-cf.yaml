@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy an EC2 instance with Apache2 installed and running.
+
+Resources:
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro  # Change instance type as needed
+      ImageId: ami-00c257e12d6828491  # Amazon Linux 2023 (Replace with the correct AMI ID for your region)
+      KeyName: aws-oregon-kp1  # Replace with your EC2 key pair
+      SecurityGroups:
+        - !Ref InstanceSecurityGroup
+      UserData:
+        Fn::Base64: |
+           #!/bin/bash
+           apt update -y
+           apt install apache2 unzip -y
+           systemctl start apache2
+           cd /var/www/html/
+           wget http://www.tooplate.com/zip-templates/2132_clean_work.zip
+           unzip 2132_clean_work.zip
+           mv index.html index.html.old
+           cp -R 2132_clean_work/* .
+      Tags:
+        - Key: Name
+          Value: MyApacheEC2Instance
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP and SSH access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0  # Restrict SSH to your IP in production
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0  # Allows HTTP access from anywhere
+
+Outputs:
+  InstancePublicIP:
+    Description: Public IP of the EC2 instance
+    Value: !GetAtt MyEC2Instance.PublicIp
