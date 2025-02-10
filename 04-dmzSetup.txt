@@ -1,0 +1,17 @@
+Create a Cloudformation template based on the below request.
+Create a Custom VPC	with CIDR ranges "10.0.0.0/16". Name this VPC as "CustomVPC".
+Create 2 Subnets. Subnet 1 with CIDR "10.0.1.0/24" called "PublicSn". Subnet 2 with CIDR "10.0.2.0/24" called "PrivateSn".
+Create 1 Internet Gateway and attach to the CustomVPC.
+Create 2 Routetables. One Route table called "Public-RT" allowing communication on port 80 and port 22 from and to outside world, meaning allowing incoming connections
+from 0.0.0.0/0. Explicitly assign the PublicSn to this Route table. Next create the Second route table called "Private-RT" allowing internal communications only
+within the VPC. Explicitly assign the "PrivateSn" to this Route Table
+Do not make any changes on the newly created NACL, but ensure all traffic is allowed on both inbound and outbound traffic.
+Create 2 Security groups. create 1 SG for allowing incoming connections from outside world, meaning 0.0.0.0/0 assign to public RT.
+Create 1 SG for allowing incoming connections from public subnet to private subnet.
+Also create a rule within the route table to allow communications from a application load balancer to the instance within the private subnet.
+Create a NAT gateway, place it in the PublicSn. 
+Now create one instance in the "PublicSn" subnet using AMI ID: ami-00c257e12d6828491, name it as "jumpServer"
+and allow communications from 0.0.0.0/0 on port 22 only.
+Now create one instance in the "PrivateSn" subnet using AMI ID: ami-00c257e12d6828491 and name it as "webServer". This webserver must be able to access the outside world
+for downloads and updates using the NAT gateway. Install Apache webserver(apache2) on the "webServer" instance, which is an Ubuntu based AMI.
+Create a application load balancer and route user traffic to the webserver running on the private server via the Application load balancer only.
